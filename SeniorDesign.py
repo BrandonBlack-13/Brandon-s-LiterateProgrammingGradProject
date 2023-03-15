@@ -4,16 +4,16 @@ import cv2
 import drivers
 
 #face detection algorithm
-def detect_features(frame, sto):
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    faces = face_cascade.detectMultiScale(gray, 1.05, 4)
+def detect_features(frame, previous):
+    color = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    face_detection_frame = face_cascade.detectMultiScale(color, 1.05, 4)
 
     maxArea = 0
     x = 0
     y = 0
     w = 0
     h = 0
-    for (_x, _y, _w, _h) in faces:
+    for (_x, _y, _w, _h) in face_detection_frame:
         if _w*_h > maxArea:
             x = _x
             y = _y
@@ -24,7 +24,7 @@ def detect_features(frame, sto):
             cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
 
     if y == 0:
-        y = sto
+        y = previous
     
     if y < 10:
         GPIO.output(8, True)
@@ -42,9 +42,9 @@ def detect_features(frame, sto):
         GPIO.output(19, False)
         GPIO.output(21, False)
     
-    sto = y
+    previous = y
 
-    return frame, sto
+    return frame, previous
 
 #converts to 480p
 def make_480p():
@@ -80,7 +80,7 @@ def sensor():
     display.lcd_display_string("Distance:" + _string + "in", 1)
 
 #Function for manual input mode
-def input(count, stoon):
+def input(count, previous):
     try:
         while True:
 
@@ -107,7 +107,7 @@ def input(count, stoon):
             if GPIO.input(11) == False:
                 display.lcd_clear()
                 display.lcd_display_string("Mode: Auto", 2)
-                auto(0, stoon)
+                auto(0, previous)
             
             if count == 40000:
                 sensor()
@@ -122,7 +122,7 @@ def input(count, stoon):
         display.lcd_clear()
 
 #Function for Automatic Mode
-def auto(count, stoot)
+def auto(count, previous)
 
     try:
         while True:
@@ -135,7 +135,7 @@ def auto(count, stoot)
 
             frame = rescale(frame, percent=5)
 
-            frame, stoot = detect_features(frame, stoot)
+            frame, previous = detect_features(frame, previous)
 
             if GPIO.input(11) == False:
                 hey = 5
@@ -143,7 +143,7 @@ def auto(count, stoot)
             else:
                 display.lcd_clear()
                 display.lcd_display_string("Mode:Manual", 2)
-                input(0, stoot)
+                input(0, previous)
 
             if count == 40000:
                 sensor()
@@ -193,6 +193,6 @@ display = drivers.lcd()
 display.lcd_clear()
 display.lcd_display_string("Mode: Manual", 2)
 
-stoop = 25
+initial_coordinates = 25
 
-input(0, stoop)
+input(0, initial_cordinates)
