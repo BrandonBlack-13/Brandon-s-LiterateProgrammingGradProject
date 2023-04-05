@@ -120,8 +120,21 @@ def initialize_GPIO():
     GPIO.setup(21, GPIO.OUT)
 
 
-# <p>face detection algorithm Explain overview and add images of how this
-#     algorithm works</p>
+# <p><span style="text-decoration: underline;"><strong>Face Detection
+#             Function:</strong></span> I learned how to utilize the OpenCV
+#     software from the link <a
+#         href="https://www.youtube.com/watch?v=anMzDYSwndE&amp;list=PLlD0XVjVhLaLVZWgJuOBrv4JBsWK99DGV&amp;index=6">here</a>.
+#     I learned that OpenCV detects faces by looking for unique features in your
+#     face such as eyes, a nose, and mouth. If enough of these features are
+#     present, then the software will recognize this part as a face and draw a
+#     box around it. The first line of the function uses the "cvtColor" function
+#     to convert the color of the image frame to a gray color. This makes the
+#     processing time faster and easier on the CPU because it does not have to
+#     render different colors. With the second line, we are defining the box
+#     that we want to create using the cascade that we choose in main. The
+#     parameter "previous" will be explained in the following sections.&nbsp;
+# </p>
+# <p>&nbsp;</p>
 def detect_features(frame, previous):
     color = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     face_detection_frame = face_cascade.detectMultiScale(color, 1.05, 4)
@@ -132,7 +145,14 @@ def detect_features(frame, previous):
     w = 0
     h = 0
 
-# <p>Explain how it Detects X, Y, W, H</p>
+# <p>This next section defines the exact coordinates of the rectangle. Once
+#     again, if you want an entire in-depth explanation of how this works.
+#     This&nbsp;<a
+#         href="https://www.youtube.com/playlist?list=PLlD0XVjVhLaLVZWgJuOBrv4JBsWK99DGV">link
+#     </a>takes you to a playlist of YouTube videos teaching you how to use it.
+#     Essentially, for each x, y, width, and height in the frame, we want to
+#     find the largest area to have the most accurate rectangle around the face,
+#     once we have that, we create the rectangle.&nbsp;</p>
 
     for (_x, _y, _w, _h) in face_detection_frame:
         if _w*_h > maxArea:
@@ -144,7 +164,18 @@ def detect_features(frame, previous):
         if maxArea > 0:
             cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
 
-# <p>Explain Output to Motors</p>
+# <p>This section of the function takes the data discovered in the previous
+#     parts and outputs them to the motors. The value assigned to y represents
+#     the pixel in the image. To explain, if the y value of the box is the 10th
+#     pixel or less, move the desk up. If it is the 30th pixel or higher, move
+#     the desk down. If it does not fit in those constraints, it does not move.
+#     These specific values took testing of how much the user should have to
+#     move for the desk to follow. The "previous" value comes in handy here. If
+#     the camera does not find a face, it automatically assigns the y value with
+#     0. This would mean that the desk would move up automatically. This
+#     previous value keeps that from happening. If y equals zero, assign y to
+#     what previous was from the last function call. Then assign previous to
+#     that y at the end no matter the y value.&nbsp;</p>
 
     if y == 0:
         y = previous
@@ -169,12 +200,23 @@ def detect_features(frame, previous):
 
     return frame, previous
 
-# <p>converts to 480p</p>
+# <p><span style="text-decoration: underline;"><strong>480p
+#             function:</strong></span> This function is simple; it takes the
+#     frame and converts it to 480p resolution. This is essentially used to make
+#     processing faster and easier for the microcontroller.</p>
+# <p>&nbsp;</p>
 def make_480p():
     stream.set(3, 72)
     stream.set(4, 96)
 
-# <p>scales down image by 30%</p>
+# <p><span style="text-decoration: underline;"><strong>Rescale
+#             function:</strong></span> This function, similar to the one
+#     before, is used to speed up the processing of the microcontroller. It
+#     takes the overall size of the image and reduces it. It can rescale to any
+#     value, but currently it is set to scale the image down to 20% of the
+#     original size. Any lower would worsen the accuracy of the face
+#     detection.&nbsp;</p>
+# <p>&nbsp;</p>
 def rescale(frame, percent=75):
     scale_percent = 20
     width = int(frame.shape[1] * scale_percent / 100)
