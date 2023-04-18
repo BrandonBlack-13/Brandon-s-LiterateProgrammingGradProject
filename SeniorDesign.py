@@ -98,8 +98,16 @@ import time
 import cv2
 import drivers
 
-# Definitions: I am defining nine global variables that go along with the 9 GPIO pins that I will be using to have the different peripherals communicate with the raspberry pi
-# In place of the physical pin number on the raspberry pi, I will be addressing the specific periphal instead. 
+# <p>Definitions: I am defining nine global variables that go along with the 9
+#     GPIO pins that I will be using to have the different peripherals
+#     communicate with the raspberry pi.&nbsp;</p>
+# <p>In place of the physical pin number on the raspberry pi, I will be
+#     addressing the specific peripheral instead.</p>
+# <p>Below is also a schematic in which I plugged in each peripheral into my
+#     raspberry pi. I denoted each wire as well. The switch and both buttons
+#     will have two wires as well. One to the GPIO and the other will go to
+#     ground.&nbsp;</p>
+# <p><img src="Scheme.png" alt="" width="622" height="352"></p>
 Up_Button = 15
 Down_Button = 13
 Mode_Switch = 11
