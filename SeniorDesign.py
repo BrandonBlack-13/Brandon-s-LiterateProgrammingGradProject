@@ -161,10 +161,10 @@ def initialize_GPIO():
 #     box around it. The first line of the function uses the "cvtColor" function
 #     to convert the color of the image frame to a gray color. This makes the
 #     processing time faster and easier on the CPU because it does not have to
-#     render different colors. With the second line, we are defining the box
-#     that we want to create using the cascade that we choose in main. The
-#     parameter "previous" will be explained in the following sections.&nbsp;
-# </p>
+#     render different colors. With the second line, we are applying the cascade
+#     that is created in the main function at the bottom of this script and
+#     using it in the frame given by the camera. The parameter "previous" will
+#     be explained in the following sections.&nbsp;</p>
 def detect_features(frame, previous):
     color = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     face_detection_frame = face_cascade.detectMultiScale(color, 1.05, 4)
@@ -183,7 +183,9 @@ def detect_features(frame, previous):
 #     Essentially, for each x, y, width, and height in the frame, we want to
 #     find the largest area to make sure the camera is only responding to the
 #     face closest to the camera. This way, the desk will not move for someone
-#     in the background.</p>
+#     in the background. Once the largest area has been determined, we draw a
+#     square around that area using the coordinates of on the frame, along with
+#     the width and height.&nbsp;</p>
 # <p><img src="Face.png" alt=""></p>
 
     for (_x, _y, _w, _h) in face_detection_frame:
@@ -234,8 +236,10 @@ def detect_features(frame, previous):
 
 # <p><span style="text-decoration: underline;"><strong>480p
 #             function:</strong></span> This function is simple; it takes the
-#     frame and converts it to 480p resolution. This is essentially used to make
-#     processing faster and easier for the microcontroller.</p>
+#     frame and converts it to 480p resolution. These parameter values are
+#     determined by image settings to reduce the quality to 480p. This is
+#     essentially used to make processing faster and easier for the
+#     microcontroller.</p>
 def make_480p():
     stream.set(3, 72)
     stream.set(4, 96)
@@ -262,9 +266,10 @@ def rescale(frame, percent=75):
 #         href="https://www.bing.com/videos/search?q=how+to+use+a+distance+sensor+with+a+raspberry+pi&amp;view=detail&amp;mid=10402C61AD26343D1E7110402C61AD26343D1E71&amp;FORM=VIRE">link</a>.
 #     Essentially, the sensor uses ultrasonic waves to determine length. It
 #     sends these waves out, and depending on the time it takes for the waves to
-#     rebound and return, this determines the distance measured. You set the
-#     GPIO to true to send the waves, start the timer and wait for the pulse to
-#     end.&nbsp;</p>
+#     rebound and return, this determines the distance measured. First, we set
+#     the trig pin to False to reset it, and then, we set it to True to send out
+#     the waves. We then start the timer while waiting for the Echo pin to
+#     return true meaning that the waves have echoed back.&nbsp;</p>
 # <p><img src="Sensor.png" alt=""></p>
 def sensor():
     GPIO.output(Sensor_Trig, False)
@@ -279,8 +284,10 @@ def sensor():
         pulse_end = time.time()
 
     # <p>You then subtract the end time and start time to get your total
-    #     duration, then convert it to height using constant conversion values.
-    #     Lastly, you display this height to the user.</p>
+    #     duration, then convert it to height using constant conversion values
+    #     that I got from using the equation: Distance = (Speed * Time) / 2 with
+    #     speed being the speed of sound which is 17,150 in/s. Lastly, you
+    #     display this height to the user.</p>
 
     duration = pulse_end - pulse_start
     distance = duration * 17150
@@ -332,7 +339,10 @@ def input(count, previous):
             #     call the sensor function. If you call the sensor function
             #     every tick, the processor will be stuck doing that instead of
             #     other important jobs. Therefore every 40,000 iterations,
-            #     update the desk height and reset the counter.&nbsp;</p>
+            #     update the desk height and reset the counter. We decided on
+            #     40,000 iterations due to lots of testing and deciding what is
+            #     a good amount of time that needs to pass before updating the
+            #     LCD.&nbsp;</p>
             if count == 40000:
                 sensor()
                 count = 0
