@@ -98,15 +98,15 @@ import time
 import cv2
 import drivers
 
-#Definitions
-
+# Definitions: I am defining nine global variables that go along with the 9 GPIO pins that I will be using to have the different peripherals communicate with the raspberry pi
+# In place of the physical pin number on the raspberry pi, I will be addressing the specific periphal instead. 
 Up_Button = 15
 Down_Button = 13
 Mode_Switch = 11
-Motor1_Up = 10
-Motor1_Down = 8
-Motor1_Up = 21
-Motor1_Down = 19
+Motor1_Up = 8
+Motor1_Down = 10
+Motor2_Up = 19
+Motor2_Down = 21
 Sensor_Trig = 16
 Sensor_Echo = 18
 
@@ -124,23 +124,23 @@ def initialize_GPIO():
     GPIO.setmode(GPIO.BOARD)
 
     #Buttons
-    GPIO.setup(15, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-    GPIO.setup(13, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+    GPIO.setup(Up_Button, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+    GPIO.setup(Down_Button, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
     #Switch
-    GPIO.setup(11, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+    GPIO.setup(Mode_Switch, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
     #Motor Controller
-    GPIO.setup(8, GPIO.OUT)
-    GPIO.setup(10, GPIO.OUT)
+    GPIO.setup(Motor1_Down, GPIO.OUT)
+    GPIO.setup(Motor1_Up, GPIO.OUT)
 
     #Sensor
-    GPIO.setup(16, GPIO.OUT)
-    GPIO.setup(18, GPIO.IN)
+    GPIO.setup(Sensor_Trig, GPIO.OUT)
+    GPIO.setup(Sensor_Echo, GPIO.IN)
 
     #Motor Controller 2
-    GPIO.setup(19, GPIO.OUT)
-    GPIO.setup(21, GPIO.OUT)
+    GPIO.setup(Motor2_Down, GPIO.OUT)
+    GPIO.setup(Motor2_Up, GPIO.OUT)
 
 
 # <p><span style="text-decoration: underline;"><strong>Face Detection
@@ -205,20 +205,20 @@ def detect_features(frame, previous):
         y = previous
     
     if y < 10:
-        GPIO.output(8, True)
-        GPIO.output(10, False)
-        GPIO.output(19, True)
-        GPIO.output(21, False)
+        GPIO.output(Motor1_Up, True)
+        GPIO.output(Motor1_Down, False)
+        GPIO.output(Motor2_Up, True)
+        GPIO.output(Motor2_Down, False)
     elif y > 30:
-        GPIO.output(8, False)
-        GPIO.output(10, True)
-        GPIO.output(19, False)
-        GPIO.output(21, True)
+        GPIO.output(Motor1_Down, False)
+        GPIO.output(Motor1_Up, True)
+        GPIO.output(Motor2_Up, False)
+        GPIO.output(Motor2_Down, True)
     else:
-        GPIO.output(8, False)
-        GPIO.output(10, False)
-        GPIO.output(19, False)
-        GPIO.output(21, False)
+        GPIO.output(Motor1_Down, False)
+        GPIO.output(Motor1_Up, False)
+        GPIO.output(Motor2_Up, False)
+        GPIO.output(Motor2_Down, False)
     
     previous = y
 
@@ -259,15 +259,15 @@ def rescale(frame, percent=75):
 #     end.&nbsp;</p>
 # <p><img src="Sensor.png" alt=""></p>
 def sensor():
-    GPIO.output(16, False)
+    GPIO.output(Sensor_Trig, False)
     time.sleep(0.000002)
-    GPIO.output(16, True)
+    GPIO.output(Sensor_Trig, True)
     time.sleep(0.00001)
-    GPIO.output(16, False)
+    GPIO.output(Sensor_Trig, False)
 
-    while GPIO.input(18) == 0:
+    while GPIO.input(Sensor_Echo) == 0:
         pulse_start = time.time()
-    while GPIO.input(18) == 1:
+    while GPIO.input(Sensor_Echo) == 1:
         pulse_end = time.time()
 
     # <p>You then subtract the end time and start time to get your total
@@ -295,28 +295,28 @@ def input(count, previous):
             #     raise or lower the desk depending on which button is
             #     pressed.&nbsp;</p>
             # <p><img src="buttons.png" alt="" width="264" height="260"></p>
-            if GPIO.input(15) == True:
-                GPIO.output(8, True)
-                GPIO.output(10, False)
-                GPIO.output(19, True)
-                GPIO.output(21, False)
+            if GPIO.input(Up_Button) == True:
+                GPIO.output(Motor1_Up, True)
+                GPIO.output(Motor1_Down, False)
+                GPIO.output(Motor2_Up, True)
+                GPIO.output(Motor2_Down, False)
 
-            elif GPIO.input(13) == True:
-                GPIO.output(8, False)
-                GPIO.output(10, True)
-                GPIO.output(19, False)
-                GPIO.output(21, True)
+            elif GPIO.input(Down_Button) == True:
+                GPIO.output(Motor1_Up, False)
+                GPIO.output(Motor1_Down, True)
+                GPIO.output(Motor2_Up, False)
+                GPIO.output(Motor2_Down, True)
 
             else:
-                GPIO.output(8, False)
-                GPIO.output(10, False)
-                GPIO.output(19, False)
-                GPIO.output(21, False)
+                GPIO.output(Motor1_Up, False)
+                GPIO.output(Motor1_Down, False)
+                GPIO.output(Motor2_Up, False)
+                GPIO.output(Motor2_Down, False)
 
             # <p>The switch is very similar to the buttons. If the switch is
             #     flipped, swap to automatic function and change the lcd display
             #     to show this change.&nbsp;</p>
-            if GPIO.input(11) == False:
+            if GPIO.input(Mode_Switch) == False:
                 display.lcd_clear()
                 display.lcd_display_string("Mode: Auto", 2)
                 auto(0, previous)
@@ -344,7 +344,7 @@ def input(count, previous):
 #     by the desk. This function also loops infinitely. It takes an image and
 #     calls the detect_features function to detect the face and calls this
 #     function repeatedly until told otherwise.&nbsp;</p>
-def auto(count, previous)
+def auto(count, previous):
 
     try:
         while True:
@@ -364,7 +364,7 @@ def auto(count, previous)
 
             # <p>The switch is used the exact same here except it converts to
             #     the manual mode instead.&nbsp;</p>
-            if GPIO.input(11) == False:
+            if GPIO.input(Mode_Switch) == False:
                 hey = 5
             
             else:
@@ -417,4 +417,4 @@ display.lcd_display_string("Mode: Manual", 2)
 
 initial_coordinates = 25
 
-input(0, initial_cordinates)
+input(0, initial_coordinates)
